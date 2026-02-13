@@ -1,0 +1,15 @@
+services:
+  saas-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Nécessaire si Next.js fait du rendu statique au build
+        - POSTGRES_URL=${POSTGRES_URL}
+        - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+    container_name: saas-starter-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: always
