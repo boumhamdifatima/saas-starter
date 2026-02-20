@@ -1,15 +1,33 @@
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: saas-db-local
+    restart: always
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: saas_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   saas-app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        # Nécessaire si Next.js fait du rendu statique au build
-        - POSTGRES_URL=${POSTGRES_URL}
+        # On passe la clé Stripe car elle est souvent nécessaire au build pour le client-side
         - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+        # On évite de forcer POSTGRES_URL ici pour ne pas bloquer le build si la DB est absente
     container_name: saas-starter-app
     ports:
-      - "3000:3000"
+      - "80:3000"
     env_file:
       - .env
+    depends_on:
+      - db
     restart: always
+
+volumes:
+  postgres_data:

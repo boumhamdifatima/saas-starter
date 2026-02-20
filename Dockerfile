@@ -11,13 +11,22 @@ RUN pnpm install --prod --frozen-lockfile
 
 # 2. Build de l'application
 FROM base AS build
+# On installe TOUTES les dépendances (nécessaire pour le build)
 RUN pnpm install --frozen-lockfile
-# On passe les variables d'environnement nécessaires au build
-ARG POSTGRES_URL
-ARG STRIPE_SECRET_KEY
-RUN pnpm run build
 
-# ... (étapes précédentes inchangées)
+# ARGUMENTS de BUILD
+ARG POSTGRES_URL
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_APP_URL
+
+# ASTUCE : On génère le client Prisma AVANT le build
+# Cela permet à Next.js de compiler même si la DB est hors-ligne
+RUN npx prisma generate
+
+# On lance le build
+# Note: Si le build plante à cause de la validation d'env, 
+# on peut ajouter SKIP_ENV_VALIDATION=1 devant la commande
+RUN pnpm run build
 
 # 3. Image finale de production
 FROM node:20-slim AS runner
