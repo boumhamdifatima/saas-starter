@@ -89,9 +89,16 @@ export async function GET(request: NextRequest) {
       .where(eq(teams.id, userTeam[0].teamId));
 
     await setSession(user[0]);
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    //return NextResponse.redirect(new URL('/dashboard', request.url));
+    // On récupère l'URL de base depuis l'env, sinon on utilise localhost par défaut
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    // On crée l'URL de redirection manuellement sans se baser sur request.url
+    return NextResponse.redirect(`${baseUrl}/dashboard`);
   } catch (error) {
     console.error('Error handling successful checkout:', error);
-    return NextResponse.redirect(new URL('/error', request.url));
+    //return NextResponse.redirect(new URL('/error', request.url));
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    return NextResponse.redirect(`${baseUrl}/error`);
   }
 }
