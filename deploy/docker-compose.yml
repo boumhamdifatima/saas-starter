@@ -1,0 +1,36 @@
+services:
+  # Nouveau service pour la base de données
+  db:
+    image: postgres:16-alpine
+    container_name: saas-db
+    restart: always
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: saas_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # On expose le port 5432 pour que tu puisses y accéder si besoin
+    ports:
+      - "5432:5432"
+
+  # L'application Next.js
+  app:
+    image: ghcr.io/boumhamdifatima/saas-starter:latest
+    container_name: saas-app
+    depends_on:
+      - db
+    ports:
+      - "80:3000"
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - BASE_URL=http://localhost:3000
+      - HOSTNAME=0.0.0.0
+    restart: always
+
+# Déclaration du volume pour ne pas perdre tes données au redémarrage
+volumes:
+  postgres_data:
+
